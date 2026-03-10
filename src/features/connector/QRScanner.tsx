@@ -11,6 +11,29 @@ export const QRScanner: React.FC = () => {
     const [linkMode, setLinkMode] = useState<'qr' | 'phone'>('qr');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [loading, setLoading] = useState(false);
+    const [availableSessions, setAvailableSessions] = useState<string[]>(['main-session']);
+
+    const fetchSessions = useCallback(async () => {
+        try {
+            const sessions = await whatsappApi.getAllSessions();
+            // Filter out specific AI mapping sessions (only wa-bot-ai-*)
+            const filtered = sessions
+                .map((s: any) => s.id)
+                .filter((id: string) => !id.startsWith('wa-bot-ai-'));
+
+            // Ensure main-session and CS-BOT are prioritized/available
+            const final = Array.from(new Set(['main-session', 'CS-BOT', ...filtered]));
+            setAvailableSessions(final);
+        } catch (err) {
+            console.error('Failed to fetch sessions', err);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchSessions();
+        const interval = setInterval(fetchSessions, 10000);
+        return () => clearInterval(interval);
+    }, [fetchSessions]);
 
     const fetchStatus = useCallback(async () => {
         try {
@@ -70,7 +93,7 @@ export const QRScanner: React.FC = () => {
             {/* Session Sidebar */}
             <div className="lg:col-span-3 space-y-4">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-6 px-4">Active Instances</h3>
-                {['main-session', 'CS-BOT', 'wa-bot-ai-1'].map((id) => (
+                {availableSessions.map((id) => (
                     <button
                         key={id}
                         onClick={() => setSessionId(id)}
@@ -81,12 +104,12 @@ export const QRScanner: React.FC = () => {
                     >
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${sessionId === id ? 'bg-whatsapp-light text-white' : 'bg-slate-100 text-slate-400'
                             }`}>
-                            {id === 'main-session' ? '⚡' : id.startsWith('wa-bot-ai') ? '🤖' : '🏢'}
+                            {id === 'main-session' ? '⚡' : id === 'CS-BOT' ? '🏢' : '👤'}
                         </div>
                         <div className="text-left">
                             <p className={`font-black uppercase text-[10px] tracking-widest ${sessionId === id ? 'text-whatsapp-teal' : 'text-slate-400'
                                 }`}>
-                                {id === 'main-session' ? 'Master' : 'Bot AI'}
+                                {id === 'main-session' ? 'Master' : id === 'CS-BOT' ? 'Support Bot' : 'User Session'}
                             </p>
                             <p className={`font-bold text-sm truncate w-24 ${sessionId === id ? 'text-slate-900' : 'text-slate-500'
                                 }`}>{id}</p>

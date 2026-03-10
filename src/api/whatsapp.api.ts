@@ -16,6 +16,13 @@ export const whatsappApi = {
         return data.sessions || [];
     },
 
+    getEnrichedInstances: async () => {
+        const { data } = await api.get<ApiResponse<any>>('/api/whatsapp/instances/enriched', {
+            headers: { 'X-Session-Id': 'main-session' }
+        });
+        return data.instances || [];
+    },
+
     getStatus: async (sessionId: string) => {
         const { data } = await api.get<ApiResponse<any>>(`/api/whatsapp/${sessionId}/status`, {
             headers: { 'X-Session-Id': sessionId }

@@ -11,8 +11,9 @@ export const BotRegistry: React.FC = () => {
     useEffect(() => {
         const load = async () => {
             try {
-                const data = await whatsappApi.getAllSessions();
-                setSessions(data.filter(s => s.id.startsWith('wa-bot-ai') || s.id === 'CS-BOT'));
+                const data = await whatsappApi.getEnrichedInstances();
+                // Neural Map specifically shows the modular AI bot instances
+                setSessions(data.filter(s => s.id.startsWith('wa-bot-ai-')));
             } catch (err) {
                 console.error(err);
             } finally {
@@ -58,8 +59,8 @@ export const BotRegistry: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
                             className={`group bg-white p-8 rounded-[2.5rem] border-2 transition-all duration-500 relative overflow-hidden ${session.isConnected
-                                    ? 'border-whatsapp-soft shadow-xl shadow-whatsapp-light/5 hover:border-whatsapp-light'
-                                    : 'border-slate-100 hover:border-slate-200 grayscale opacity-60'
+                                ? 'border-whatsapp-soft shadow-xl shadow-whatsapp-light/5 hover:border-whatsapp-light'
+                                : 'border-slate-100 hover:border-slate-200 grayscale opacity-60'
                                 }`}
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-whatsapp-soft/10 rounded-full -mr-16 -mt-16 transform transition-transform group-hover:scale-150 duration-700"></div>
@@ -85,11 +86,16 @@ export const BotRegistry: React.FC = () => {
                                 </p>
 
                                 <div className="pt-8 mt-8 border-t border-slate-50 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Users className="w-4 h-4 text-slate-400" />
-                                        <span className="text-sm font-bold text-slate-600">
-                                            {session.user?.name || 'Enterprise User'}
-                                        </span>
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        <Users className="w-4 h-4 text-slate-400 shrink-0" />
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-bold text-slate-600 truncate">
+                                                {session.user?.full_name || session.user?.username || 'Enterprise User'}
+                                            </span>
+                                            <span className="text-[10px] text-slate-400 font-medium">
+                                                {session.user?.email || 'System Account'}
+                                            </span>
+                                        </div>
                                     </div>
                                     <button className="p-2 hover:bg-slate-50 rounded-lg text-whatsapp-teal transition-colors">
                                         <ExternalLink className="w-4 h-4" />
