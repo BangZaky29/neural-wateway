@@ -12,8 +12,9 @@ export const BotRegistry: React.FC = () => {
         const load = async () => {
             try {
                 const data = await whatsappApi.getEnrichedInstances();
-                // Neural Map specifically shows the modular AI bot instances
-                setSessions(data.filter(s => s.id.startsWith('wa-bot-ai-')));
+                // Neural Map specifically shows modular bot instances (everything except system sessions)
+                const SYSTEM_SESSIONS = ['main-session', 'CS-BOT'];
+                setSessions(data.filter(s => !SYSTEM_SESSIONS.includes(s.id)));
             } catch (err) {
                 console.error(err);
             } finally {

@@ -15,15 +15,10 @@ export const QRScanner: React.FC = () => {
 
     const fetchSessions = useCallback(async () => {
         try {
-            const sessions = await whatsappApi.getAllSessions();
-            // Filter out specific AI mapping sessions (only wa-bot-ai-*)
-            const filtered = sessions
-                .map((s: any) => s.id)
-                .filter((id: string) => !id.startsWith('wa-bot-ai-'));
-
-            // Ensure main-session and CS-BOT are prioritized/available
-            const final = Array.from(new Set(['main-session', 'CS-BOT', ...filtered]));
-            setAvailableSessions(final);
+            // Connector Sidebar strictly shows only System/Master sessions
+            // All subscriber/modular bots (UUIDs or wa-bot-ai-*) go to AI Bot Map
+            const SYSTEM_SESSIONS = ['main-session', 'CS-BOT'];
+            setAvailableSessions(SYSTEM_SESSIONS);
         } catch (err) {
             console.error('Failed to fetch sessions', err);
         }
